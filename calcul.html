@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECOLOG Innovation — Calculateur de primes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1c2230;
+    --card: #1a2035;
+    --card2: #202840;
+    --border: rgba(99,130,190,0.15);
+    --border2: rgba(99,130,190,0.28);
+    --accent: #3b7ef8;
+    --accent2: #5b9cf8;
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.10);
+    --green-border: rgba(34,197,94,0.25);
+    --red: #f87171;
+    --red-bg: rgba(248,113,113,0.10);
+    --red-border: rgba(248,113,113,0.25);
+    --amber: #fbbf24;
+    --amber-bg: rgba(251,191,36,0.10);
+    --text: #e6edf3;
+    --text2: #8b9ab5;
+    --text3: #5a6a85;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(59,126,248,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(34,197,94,0.07) 0%, transparent 55%);
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .header-left {}
+  .brand {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--text);
+    line-height: 1.15;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 6px;
+    font-weight: 300;
+  }
+  .month-select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .month-label { font-size: 12px; color: var(--text3); }
+  select {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  select:hover { border-color: var(--accent); }
+  .mars-badge {
+    display: none;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--amber);
+    background: var(--amber-bg);
+    border: 1px solid rgba(251,191,36,0.25);
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  @media(max-width:720px){ .main-grid, .track-grid { grid-template-columns: 1fr !important; } }
+  .track-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.4rem 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card-accent {
+    background: linear-gradient(135deg, #1a2035 0%, #1c2a4a 100%);
+    border: 1px solid rgba(59,126,248,0.25);
+    border-radius: 16px;
+    padding: 1.4rem 1.5rem;
+  }
+  .card h3 {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 1.1rem;
+  }
+
+  /* FIELDS */
+  .field { margin-bottom: 0.85rem; }
+  .field label {
+    font-size: 11px;
+    color: var(--text3);
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 400;
+  }
+  .field input {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 9px 12px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .field input:focus { border-color: var(--accent); background: var(--card2); }
+  .field input[readonly] {
+    background: transparent;
+    border-color: transparent;
+    color: var(--text2);
+    font-weight: 500;
+    font-size: 15px;
+    padding-left: 0;
+    cursor: default;
+  }
+  .divider { height: 1px; background: var(--border); margin: 1rem 0; }
+
+  /* METRICS */
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-row .ml { color: var(--text3); }
+  .metric-row .mv { font-weight: 500; font-size: 15px; }
+  .metric-row .mv.positive { color: var(--green); }
+  .metric-row .mv.negative { color: var(--red); }
+  .metric-row .mv.neutral { color: var(--accent2); }
+
+  /* BIG STAT */
+  .big-stat {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .big-stat .bs-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .big-stat .bs-value { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--text); }
+  .big-stat .bs-value.positive { color: var(--green); }
+  .big-stat .bs-value.negative { color: var(--red); }
+  .big-stat .bs-value.blue { color: var(--accent2); }
+
+  /* PRIME BADGES */
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+  }
+  .badge.earned { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .badge.none { background: rgba(139,154,181,0.08); color: var(--text3); border: 1px solid var(--border); }
+
+  /* BARÈME ROWS */
+  .bareme-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 7px 10px; border-radius: 8px; margin-bottom: 3px;
+    font-size: 12px; transition: background 0.15s;
+  }
+  .bareme-row .br-seuil { color: var(--text3); }
+  .bareme-row .br-prime { font-weight: 500; color: var(--text2); }
+  .bareme-row.reached .br-seuil { color: var(--green); }
+  .bareme-row.reached .br-prime { color: var(--green); }
+  .bareme-row.active { background: var(--green-bg); border: 1px solid var(--green-border); }
+  .bareme-row.active .br-seuil { color: var(--green); }
+  .bareme-row.active .br-prime { color: var(--green); }
+
+  /* CUMUL INDICATORS */
+  .cumul-pill {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-radius: 10px; margin-top: 8px;
+    font-size: 13px;
+  }
+  .cumul-pill.positive { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+  .cumul-pill.negative { background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); }
+  .cumul-pill .cp-label { font-size: 11px; opacity: 0.8; }
+  .cumul-pill .cp-value { font-family: 'DM Serif Display', serif; font-size: 18px; font-weight: 400; }
+
+  /* TOTAL PRIME */
+  .total-prime-box {
+    background: linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(59,126,248,0.06) 100%);
+    border: 1px solid var(--green-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .total-prime-box .tpl { font-size: 11px; color: var(--text2); }
+  .total-prime-box .tpv { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--green); }
+
+  /* TRACKING CARDS */
+  .track-inner { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--border); margin-top: 8px; font-size: 13px; }
+  .track-inner .ti-l { color: var(--text3); font-size: 11px; }
+  .track-inner .ti-v { font-weight: 500; font-size: 15px; }
+  .track-inner .ti-v.red { color: var(--red); }
+  .track-inner .ti-v.blue { color: var(--accent2); }
+  .track-inner .ti-v.green { color: var(--green); }
+
+  /* PROGRESS BAR */
+  .pbar { height: 4px; background: rgba(99,130,190,0.12); border-radius: 2px; margin: 10px 0 4px; overflow: hidden; }
+  .pbar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.4s ease; }
+  .pbar-label { font-size: 10px; color: var(--text3); }
+
+  /* CONSEIL */
+  .conseil {
+    background: linear-gradient(135deg, rgba(59,126,248,0.06) 0%, rgba(34,197,94,0.04) 100%);
+    border: 1px solid rgba(59,126,248,0.2);
+    border-radius: 16px;
+    padding: 1.4rem 1.5rem;
+    margin-top: 1.25rem;
+  }
+  .conseil-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+    color: var(--accent2); text-transform: uppercase; margin-bottom: 10px;
+  }
+  .conseil-head::before {
+    content: '';
+    display: inline-block; width: 6px; height: 6px;
+    background: var(--accent2); border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+  .conseil-text { font-size: 13px; color: var(--text2); line-height: 1.75; }
+  .conseil-text strong { color: var(--text); font-weight: 500; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--text);
+    margin: 2rem 0 1rem;
+  }
+
+  /* FOOTER */
+  .footer { margin-top: 3rem; text-align: center; font-size: 11px; color: var(--text3); }
+
+  /* ANIMATIONS */
+  .card, .card-accent, .conseil, .track-grid .card {
+    animation: fadeUp 0.4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-left">
+      <div class="brand">ECOLOG Innovation</div>
+      <div class="title">Calculateur de primes</div>
+      <div class="subtitle">Fond de roulement mensuel · Simulation · Suivi de facturation</div>
+    </div>
+    <div class="month-select-wrap">
+      <span class="month-label">Mois sélectionné</span>
+      <select id="monthSelect">
+        <option value="mars2026">Mars 2026</option>
+        <option value="0" selected>Avril 2026</option>
+        <option value="1">Mai 2026</option>
+        <option value="2">Juin 2026</option>
+        <option value="3">Juillet 2026</option>
+        <option value="4">Août 2026</option>
+        <option value="5">Septembre 2026</option>
+        <option value="6">Octobre 2026</option>
+        <option value="7">Novembre 2026</option>
+        <option value="8">Décembre 2026</option>
+        <option value="9">Janvier 2027</option>
+        <option value="10">Février 2027</option>
+        <option value="11">Mars 2027</option>
+        <option value="12">Avril 2027</option>
+      </select>
+      <span class="mars-badge" id="marsBadge">Frais de siège non applicables</span>
+    </div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- COL GAUCHE -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <div class="card">
+        <h3>Compte de résultat mensuel</h3>
+        <div class="field">
+          <label>Chiffre d'affaires encaissé TTC (€)</label>
+          <input type="number" id="ca" value="90000" min="0" step="100">
+        </div>
+        <div class="divider"></div>
+        <div class="field">
+          <label>Charges variables (achats, main d'œuvre, transport…) TTC (€)</label>
+          <input type="number" id="chargesVar" value="50000" min="0" step="100">
+        </div>
+        <div class="field">
+          <label id="fraisSiegeLabel">Frais de siège TTC (€)</label>
+          <input type="number" id="fraisSiege" value="12000" min="0" step="100">
+        </div>
+        <div class="divider"></div>
+        <div class="field">
+          <label>Marge brute TTC (calculée)</label>
+          <input type="number" id="margeBrute" readonly>
+        </div>
+        <div class="field">
+          <label>Marge nette TTC (calculée)</label>
+          <input type="number" id="margeNette" readonly>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Cumul annuel — depuis mars 2026</h3>
+        <div class="field">
+          <label>CA cumulé encaissé TTC (€)</label>
+          <input type="number" id="caCumul" value="90000" min="0" step="100">
+        </div>
+        <div class="field">
+          <label>Coûts cumulés TTC (€)</label>
+          <input type="number" id="coutsCumul" value="62000" min="0" step="100">
+        </div>
+        <div class="cumul-pill positive" id="cumulIndicator">
+          <span class="cp-label">Marge cumul</span>
+          <span class="cp-value" id="cumulValue">+28 000 €</span>
+        </div>
+      </div>
+
+      <div class="card-accent">
+        <h3>Cumul global — fond de roulement</h3>
+        <div class="field">
+          <label>Cumul global modifiable TTC (€) — solde de départ ou report</label>
+          <input type="number" id="cumulGlobal" value="0" step="100">
+        </div>
+        <div class="field">
+          <label>Fond de roulement total (cumul global + marge nette du mois)</label>
+          <input type="number" id="cumulGlobalCalc" readonly>
+        </div>
+        <div class="cumul-pill positive" id="cumulGlobalIndicator">
+          <span class="cp-label">Fond de roulement</span>
+          <span class="cp-value" id="cumulGlobalValue">0 €</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COL DROITE -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <div class="card">
+        <h3>Résultats du mois</h3>
+        <div class="metric-row"><span class="ml">Chiffre d'affaires</span><span class="mv neutral" id="res_ca">90 000 €</span></div>
+        <div class="metric-row"><span class="ml">Marge brute</span><span class="mv" id="res_mb">40 000 €</span></div>
+        <div class="metric-row"><span class="ml">Marge nette</span><span class="mv positive" id="res_mn">28 000 €</span></div>
+
+        <div class="divider"></div>
+        <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Primes acquises</div>
+        <div class="badge-row" id="badgeRow"></div>
+        <div class="total-prime-box">
+          <span class="tpl">Prime totale du mois<br><span style="font-size:10px;opacity:0.6;">(mensuelle + cumul)</span></span>
+          <span class="tpv" id="totalPrime">0 €</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Barème — prime mensuelle</h3>
+        <div id="baremeMensuel"></div>
+      </div>
+
+      <div class="card">
+        <h3>Barème — prime cumul</h3>
+        <div id="baremeCumul"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section-title">Suivi de facturation</div>
+  <div class="track-grid">
+    <div class="card">
+      <h3>Retard de paiement</h3>
+      <div class="field">
+        <label>Montant échu non encaissé TTC (€)</label>
+        <input type="number" id="retard" value="0" min="0" step="100">
+      </div>
+      <div class="track-inner">
+        <span class="ti-l">Total en retard</span>
+        <span class="ti-v red" id="retardDisplay">0 €</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>À encaisser ce mois</h3>
+      <div class="field">
+        <label>Encaissement prévu TTC (€)</label>
+        <input type="number" id="apayer" value="0" min="0" step="100">
+      </div>
+      <div class="track-inner">
+        <span class="ti-l">Prévu ce mois</span>
+        <span class="ti-v blue" id="apayerDisplay">0 €</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Total facturé</h3>
+      <div class="field">
+        <label>Montant total facturé TTC (€)</label>
+        <input type="number" id="totalFacture" value="0" min="0" step="100">
+      </div>
+      <div class="track-inner">
+        <span class="ti-l">Facturé global</span>
+        <span class="ti-v green" id="totalFactureDisplay">0 €</span>
+      </div>
+      <div class="pbar"><div class="pbar-fill" id="pbarFill" style="width:0%"></div></div>
+      <div class="pbar-label" id="pbarLabel">0 % encaissé</div>
+    </div>
+  </div>
+
+  <div class="conseil">
+    <div class="conseil-head">Conseil personnalisé</div>
+    <div class="conseil-text" id="conseilText">Renseignez vos données pour obtenir des recommandations.</div>
+  </div>
+
+  <div class="footer">ECOLOG Innovation · Outil interne de simulation commerciale</div>
+
+</div>
+
+<script>
+const BAREME_MENSUEL = [
+  { ca: 4000, prime: 125 },
+  { ca: 12080, prime: 250 },
+  { ca: 21895, prime: 584 },
+  { ca: 36240, prime: 1139 },
+  { ca: 49075, prime: 1639 },
+];
+const BAREME_CUMUL = [
+  { ca: 4500, prime: 292 },
+  { ca: 13590, prime: 584 },
+  { ca: 21290, prime: 1139 },
+  { ca: 28992, prime: 1639 },
+];
+
+function fmt(n) {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+}
+function getPrime(b, m) {
+  let p = 0;
+  for (let i = b.length - 1; i >= 0; i--) { if (m >= b[i].ca) { p = b[i].prime; break; } }
+  return p;
+}
+function getNext(b, m) {
+  for (let i = 0; i < b.length; i++) { if (m < b[i].ca) return b[i]; }
+  return null;
+}
+function renderBareme(id, b, marge) {
+  document.getElementById(id).innerHTML = b.map((row, i) => {
+    const reached = marge >= row.ca;
+    const active = reached && (i === b.length - 1 || marge < b[i+1]?.ca);
+    return `<div class="bareme-row ${active ? 'active' : reached ? 'reached' : ''}">
+      <span class="br-seuil">${reached ? '✓ ' : ''}Marge ≥ ${fmt(row.ca)}</span>
+      <span class="br-prime">${fmt(row.prime)}</span>
+    </div>`;
+  }).join('');
+}
+
+function update() {
+  const mars = document.getElementById('monthSelect').value === 'mars2026';
+  document.getElementById('marsBadge').style.display = mars ? 'inline' : 'none';
+
+  const ca = parseFloat(document.getElementById('ca').value) || 0;
+  const cv = parseFloat(document.getElementById('chargesVar').value) || 0;
+  const fsEl = document.getElementById('fraisSiege');
+  if (mars) { fsEl.value = 0; fsEl.readOnly = true; } else { fsEl.readOnly = false; if (!fsEl.value) fsEl.value = 12000; }
+  document.getElementById('fraisSiegeLabel').textContent = mars ? 'Frais de siège TTC (€) — non applicable mars 2026' : 'Frais de siège TTC (€)';
+  const fs = mars ? 0 : (parseFloat(fsEl.value) || 0);
+
+  const caCumul = parseFloat(document.getElementById('caCumul').value) || 0;
+  const coutsCumul = parseFloat(document.getElementById('coutsCumul').value) || 0;
+  const cumulGlobal = parseFloat(document.getElementById('cumulGlobal').value) || 0;
+  const retard = parseFloat(document.getElementById('retard').value) || 0;
+  const apayer = parseFloat(document.getElementById('apayer').value) || 0;
+  const totalFacture = parseFloat(document.getElementById('totalFacture').value) || 0;
+
+  const mb = ca - cv;
+  const mn = mb - fs;
+  const cumulMarge = caCumul - coutsCumul;
+  const cgCalc = cumulGlobal + mn;
+
+  document.getElementById('margeBrute').value = Math.round(mb);
+  document.getElementById('margeNette').value = Math.round(mn);
+  document.getElementById('cumulGlobalCalc').value = Math.round(cgCalc);
+
+  document.getElementById('res_ca').textContent = fmt(ca);
+  document.getElementById('res_mb').textContent = fmt(mb);
+  const mnEl = document.getElementById('res_mn');
+  mnEl.textContent = fmt(mn);
+  mnEl.className = 'mv ' + (mn >= 0 ? 'positive' : 'negative');
+
+  const pm = getPrime(BAREME_MENSUEL, mn);
+  const pc = getPrime(BAREME_CUMUL, cumulMarge);
+  document.getElementById('totalPrime').textContent = fmt(pm + pc);
+
+  const br = document.getElementById('badgeRow');
+  br.innerHTML = '';
+  const bm = document.createElement('span');
+  bm.className = 'badge ' + (pm > 0 ? 'earned' : 'none');
+  bm.textContent = pm > 0 ? 'Mensuelle : ' + fmt(pm) : 'Mensuelle : aucune';
+  br.appendChild(bm);
+  const bc = document.createElement('span');
+  bc.className = 'badge ' + (pc > 0 ? 'earned' : 'none');
+  bc.textContent = pc > 0 ? 'Cumul : ' + fmt(pc) : 'Cumul : aucune';
+  br.appendChild(bc);
+
+  const ci = document.getElementById('cumulIndicator');
+  ci.className = 'cumul-pill ' + (cumulMarge >= 0 ? 'positive' : 'negative');
+  document.getElementById('cumulValue').textContent = (cumulMarge >= 0 ? '+' : '') + fmt(cumulMarge);
+
+  const cgi = document.getElementById('cumulGlobalIndicator');
+  cgi.className = 'cumul-pill ' + (cgCalc >= 0 ? 'positive' : 'negative');
+  document.getElementById('cumulGlobalValue').textContent = (cgCalc >= 0 ? '+' : '') + fmt(cgCalc);
+
+  renderBareme('baremeMensuel', BAREME_MENSUEL, mn);
+  renderBareme('baremeCumul', BAREME_CUMUL, cumulMarge);
+
+  document.getElementById('retardDisplay').textContent = fmt(retard);
+  document.getElementById('apayerDisplay').textContent = fmt(apayer);
+  document.getElementById('totalFactureDisplay').textContent = fmt(totalFacture);
+  const ratio = totalFacture > 0 ? Math.min(100, (caCumul / totalFacture) * 100) : 0;
+  document.getElementById('pbarFill').style.width = Math.round(ratio) + '%';
+  document.getElementById('pbarLabel').textContent = Math.round(ratio) + '% encaissé';
+
+  // CONSEILS
+  const parts = [];
+  if (cumulMarge < 0) parts.push(`Votre marge cumul est <strong>négative (${fmt(cumulMarge)})</strong>. Priorité : couvrir le déficit avant de viser des primes cumul. Il vous faut <strong>${fmt(-cumulMarge)}</strong> supplémentaires pour revenir à l'équilibre.`);
+  const nm = getNext(BAREME_MENSUEL, mn);
+  if (nm) {
+    const manque = nm.ca - mn;
+    parts.push(`Prime mensuelle : il vous manque <strong>${fmt(manque)} de marge nette</strong> pour atteindre le palier suivant à <strong>${fmt(nm.prime)}</strong>. Cela représente environ <strong>${fmt(manque + fs)}</strong> de CA supplémentaire à encaisser.`);
+  } else {
+    parts.push(`Vous avez atteint le <strong>palier maximum de prime mensuelle (${fmt(1639)})</strong>. Excellent mois !`);
+  }
+  const nc = getNext(BAREME_CUMUL, cumulMarge);
+  if (nc && cumulMarge >= 0) parts.push(`Prime cumul : il vous manque <strong>${fmt(nc.ca - cumulMarge)}</strong> de marge cumul pour atteindre le palier suivant à <strong>${fmt(nc.prime)}</strong>.`);
+  if (retard > 0) parts.push(`Vous avez <strong>${fmt(retard)} en retard de paiement</strong>. Si encaissé ce mois, votre CA atteindrait <strong>${fmt(ca + retard)}</strong>.`);
+  if (apayer > 0) {
+    const mnSim = (ca + apayer) - cv - fs;
+    const pSim = getPrime(BAREME_MENSUEL, mnSim);
+    if (pSim > pm) parts.push(`Simulation : en encaissant les <strong>${fmt(apayer)} prévus</strong>, votre prime mensuelle passerait à <strong>${fmt(pSim)}</strong> (+${fmt(pSim - pm)}).`);
+  }
+  if (mars) parts.push(`<strong>Mars 2026</strong> : les frais de siège ne s'appliquent pas encore. Votre marge brute = marge nette ce mois-ci.`);
+  document.getElementById('conseilText').innerHTML = parts.join('<br><br>') || 'Renseignez vos données pour obtenir des recommandations personnalisées.';
+}
+
+document.querySelectorAll('input[type="number"], select').forEach(el => el.addEventListener('input', update));
+update();
+</script>
+</body>
+</html>
