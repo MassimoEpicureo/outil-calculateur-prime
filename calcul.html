@@ -96,16 +96,7 @@
     transition: border-color 0.2s;
   }
   select:hover { border-color: var(--accent); }
-  .mars-badge {
-    display: none;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--amber);
-    background: var(--amber-bg);
-    border: 1px solid rgba(251,191,36,0.25);
-    padding: 5px 12px;
-    border-radius: 20px;
-  }
+
 
   /* GRID */
   .main-grid {
@@ -344,7 +335,7 @@
         <option value="11">Mars 2027</option>
         <option value="12">Avril 2027</option>
       </select>
-      <span class="mars-badge" id="marsBadge">Frais de siège non applicables</span>
+
     </div>
   </div>
 
@@ -376,22 +367,6 @@
         <div class="field">
           <label>Marge nette TTC (calculée)</label>
           <input type="number" id="margeNette" readonly>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Cumul annuel — depuis mars 2026</h3>
-        <div class="field">
-          <label>CA cumulé encaissé TTC (€)</label>
-          <input type="number" id="caCumul" value="90000" min="0" step="100">
-        </div>
-        <div class="field">
-          <label>Coûts cumulés TTC (€)</label>
-          <input type="number" id="coutsCumul" value="62000" min="0" step="100">
-        </div>
-        <div class="cumul-pill positive" id="cumulIndicator">
-          <span class="cp-label">Marge cumul</span>
-          <span class="cp-value" id="cumulValue">+28 000 €</span>
         </div>
       </div>
 
@@ -531,18 +506,9 @@ function renderBareme(id, b, marge) {
 }
 
 function update() {
-  const mars = document.getElementById('monthSelect').value === 'mars2026';
-  document.getElementById('marsBadge').style.display = mars ? 'inline' : 'none';
-
   const ca = parseFloat(document.getElementById('ca').value) || 0;
   const cv = parseFloat(document.getElementById('chargesVar').value) || 0;
-  const fsEl = document.getElementById('fraisSiege');
-  if (mars) { fsEl.value = 0; fsEl.readOnly = true; } else { fsEl.readOnly = false; if (!fsEl.value) fsEl.value = 12000; }
-  document.getElementById('fraisSiegeLabel').textContent = mars ? 'Frais de siège TTC (€) — non applicable mars 2026' : 'Frais de siège TTC (€)';
-  const fs = mars ? 0 : (parseFloat(fsEl.value) || 0);
-
-  const caCumul = parseFloat(document.getElementById('caCumul').value) || 0;
-  const coutsCumul = parseFloat(document.getElementById('coutsCumul').value) || 0;
+  const fs = parseFloat(document.getElementById('fraisSiege').value) || 0;
   const cumulGlobal = parseFloat(document.getElementById('cumulGlobal').value) || 0;
   const retard = parseFloat(document.getElementById('retard').value) || 0;
   const apayer = parseFloat(document.getElementById('apayer').value) || 0;
@@ -550,7 +516,6 @@ function update() {
 
   const mb = ca - cv;
   const mn = mb - fs;
-  const cumulMarge = caCumul - coutsCumul;
   const cgCalc = cumulGlobal + mn;
 
   document.getElementById('margeBrute').value = Math.round(mb);
@@ -564,7 +529,7 @@ function update() {
   mnEl.className = 'mv ' + (mn >= 0 ? 'positive' : 'negative');
 
   const pm = getPrime(BAREME_MENSUEL, mn);
-  const pc = getPrime(BAREME_CUMUL, cumulMarge);
+  const pc = getPrime(BAREME_CUMUL, cgCalc);
   document.getElementById('totalPrime').textContent = fmt(pm + pc);
 
   const br = document.getElementById('badgeRow');
@@ -578,27 +543,22 @@ function update() {
   bc.textContent = pc > 0 ? 'Cumul : ' + fmt(pc) : 'Cumul : aucune';
   br.appendChild(bc);
 
-  const ci = document.getElementById('cumulIndicator');
-  ci.className = 'cumul-pill ' + (cumulMarge >= 0 ? 'positive' : 'negative');
-  document.getElementById('cumulValue').textContent = (cumulMarge >= 0 ? '+' : '') + fmt(cumulMarge);
-
   const cgi = document.getElementById('cumulGlobalIndicator');
   cgi.className = 'cumul-pill ' + (cgCalc >= 0 ? 'positive' : 'negative');
   document.getElementById('cumulGlobalValue').textContent = (cgCalc >= 0 ? '+' : '') + fmt(cgCalc);
 
   renderBareme('baremeMensuel', BAREME_MENSUEL, mn);
-  renderBareme('baremeCumul', BAREME_CUMUL, cumulMarge);
+  renderBareme('baremeCumul', BAREME_CUMUL, cgCalc);
 
   document.getElementById('retardDisplay').textContent = fmt(retard);
   document.getElementById('apayerDisplay').textContent = fmt(apayer);
   document.getElementById('totalFactureDisplay').textContent = fmt(totalFacture);
-  const ratio = totalFacture > 0 ? Math.min(100, (caCumul / totalFacture) * 100) : 0;
+  const ratio = totalFacture > 0 ? Math.min(100, (ca / totalFacture) * 100) : 0;
   document.getElementById('pbarFill').style.width = Math.round(ratio) + '%';
   document.getElementById('pbarLabel').textContent = Math.round(ratio) + '% encaissé';
 
-  // CONSEILS
   const parts = [];
-  if (cumulMarge < 0) parts.push(`Votre marge cumul est <strong>négative (${fmt(cumulMarge)})</strong>. Priorité : couvrir le déficit avant de viser des primes cumul. Il vous faut <strong>${fmt(-cumulMarge)}</strong> supplémentaires pour revenir à l'équilibre.`);
+  if (cgCalc < 0) parts.push(`Votre fond de roulement est <strong>négatif (${fmt(cgCalc)})</strong>. Il vous faut <strong>${fmt(-cgCalc)}</strong> supplémentaires pour revenir à l'équilibre.`);
   const nm = getNext(BAREME_MENSUEL, mn);
   if (nm) {
     const manque = nm.ca - mn;
@@ -606,15 +566,14 @@ function update() {
   } else {
     parts.push(`Vous avez atteint le <strong>palier maximum de prime mensuelle (${fmt(1639)})</strong>. Excellent mois !`);
   }
-  const nc = getNext(BAREME_CUMUL, cumulMarge);
-  if (nc && cumulMarge >= 0) parts.push(`Prime cumul : il vous manque <strong>${fmt(nc.ca - cumulMarge)}</strong> de marge cumul pour atteindre le palier suivant à <strong>${fmt(nc.prime)}</strong>.`);
+  const nc = getNext(BAREME_CUMUL, cgCalc);
+  if (nc && cgCalc >= 0) parts.push(`Prime cumul : il vous manque <strong>${fmt(nc.ca - cgCalc)}</strong> de fond de roulement pour atteindre le palier suivant à <strong>${fmt(nc.prime)}</strong>.`);
   if (retard > 0) parts.push(`Vous avez <strong>${fmt(retard)} en retard de paiement</strong>. Si encaissé ce mois, votre CA atteindrait <strong>${fmt(ca + retard)}</strong>.`);
   if (apayer > 0) {
     const mnSim = (ca + apayer) - cv - fs;
     const pSim = getPrime(BAREME_MENSUEL, mnSim);
     if (pSim > pm) parts.push(`Simulation : en encaissant les <strong>${fmt(apayer)} prévus</strong>, votre prime mensuelle passerait à <strong>${fmt(pSim)}</strong> (+${fmt(pSim - pm)}).`);
   }
-  if (mars) parts.push(`<strong>Mars 2026</strong> : les frais de siège ne s'appliquent pas encore. Votre marge brute = marge nette ce mois-ci.`);
   document.getElementById('conseilText').innerHTML = parts.join('<br><br>') || 'Renseignez vos données pour obtenir des recommandations personnalisées.';
 }
 
